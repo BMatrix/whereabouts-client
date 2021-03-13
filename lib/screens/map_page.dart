@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:latlong/latlong.dart';
+import 'package:whereabouts_client/components/settings.dart';
 
 class MapPage extends StatefulWidget {
   @override
@@ -66,26 +67,67 @@ class _MapPageState extends State<MapPage> {
   }
 
   Widget build(BuildContext context) {
-    return Scaffold(
-      floatingActionButton: FloatingActionButton(
-        child: Icon(Icons.my_location),
-        onPressed: () {
-          mapController.move(getLatLng(), 15);
-          mapController.rotate(0);
-        },
-      ),
-      body: FlutterMap(
-        mapController: mapController,
-        options: MapOptions(
-          center: LatLng(0, 0),
-          zoom: 2.0,
-        ),
-        layers: [
-          TileLayerOptions(
-              urlTemplate: "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
-              subdomains: ['a', 'b', 'c']),
-          MarkerLayerOptions(
-            markers: getMarkers(),
+    return Container(
+      child: Stack(
+        children: [
+          FlutterMap(
+            mapController: mapController,
+            options: MapOptions(
+              center: LatLng(0, 0),
+              zoom: 2.0,
+            ),
+            layers: [
+              TileLayerOptions(
+                  urlTemplate:
+                      "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+                  subdomains: ['a', 'b', 'c']),
+              MarkerLayerOptions(
+                markers: getMarkers(),
+              ),
+            ],
+          ),
+          SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Align(
+                alignment: Alignment.centerRight,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Expanded(
+                      flex: 3,
+                      child: Settings(),
+                    ),
+                    Expanded(
+                      flex: 1,
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          FloatingActionButton(
+                            backgroundColor: Colors.orange,
+                            child: Icon(Icons.all_out),
+                            onPressed: () {},
+                          ),
+                          SizedBox(
+                            width: 0,
+                            height: 15,
+                          ),
+                          FloatingActionButton(
+                            backgroundColor: Colors.blue,
+                            child: Icon(Icons.my_location),
+                            onPressed: () {
+                              mapController.move(getLatLng(), 15);
+                              mapController.rotate(0);
+                            },
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
           ),
         ],
       ),
