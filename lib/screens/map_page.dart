@@ -5,6 +5,7 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:latlong/latlong.dart';
 import 'package:whereabouts_client/components/settings.dart';
+import 'package:whereabouts_client/services/mock_location.dart';
 
 class MapPage extends StatefulWidget {
   @override
@@ -13,31 +14,44 @@ class MapPage extends StatefulWidget {
 
 class _MapPageState extends State<MapPage> {
   MapController mapController = MapController();
-  Position currentLocation;
+  LatLng currentLocation;
+  List<Person> people = [];
   Timer timer;
+  Timer sharedTimer;
 
   @override
   void initState() {
     super.initState();
-    Geolocator.getCurrentPosition().then((value) {
+    updatePosition();
+    MockLocation.getSharedLocations().then((people) {
       setState(() {
-        currentLocation = value;
-        mapController.move(getLatLng(), 15);
+        this.people = people;
       });
     });
-    timer = Timer.periodic(Duration(seconds: 10), (t) => getPosition());
+    timer = Timer.periodic(Duration(seconds: 10), (t) => updatePosition());
+    sharedTimer =
+        Timer.periodic(Duration(seconds: 20), (t) => updateSharedPositions());
   }
 
   @override
   void dispose() {
     timer.cancel();
+    sharedTimer.cancel();
     super.dispose();
   }
 
-  void getPosition() {
-    Geolocator.getCurrentPosition().then((value) {
+  void updatePosition() {
+    Geolocator.getCurrentPosition().then((position) {
       setState(() {
-        currentLocation = value;
+        currentLocation = LatLng(position.latitude, position.longitude);
+      });
+    });
+  }
+
+  void updateSharedPositions() {
+    MockLocation.getSharedLocations().then((people) {
+      setState(() {
+        this.people = people;
       });
     });
   }
@@ -53,7 +67,7 @@ class _MapPageState extends State<MapPage> {
         Marker(
           width: 40.0,
           height: 40.0,
-          point: getLatLng(),
+          point: currentLocation,
           builder: (ctx) => Container(
             child: Icon(
               Icons.radio_button_checked,
@@ -63,6 +77,22 @@ class _MapPageState extends State<MapPage> {
         ),
       );
     }
+
+    for (Person person in people) {
+      markers.add(
+        Marker(
+          point: person.location,
+          builder: (ctx) => Container(
+            child: Icon(
+              Icons.person_pin,
+              color: Colors.green,
+              size: 50,
+            ),
+          ),
+        ),
+      );
+    }
+
     return markers;
   }
 
@@ -117,7 +147,7 @@ class _MapPageState extends State<MapPage> {
                             backgroundColor: Colors.blue,
                             child: Icon(Icons.my_location),
                             onPressed: () {
-                              mapController.move(getLatLng(), 15);
+                              mapController.move(currentLocation, 15);
                               mapController.rotate(0);
                             },
                           ),
