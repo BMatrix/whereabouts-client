@@ -18,6 +18,8 @@ Random random = Random();
 List<String> mocknames = ["A", "B", "C", "D", "E"];
 
 class MockLocation {
+  //Simulates requesting locations from the server
+  //There is a 1 second delay untill locations are returned
   static Future<List<Person>> getSharedLocations() {
     return Future.delayed(Duration(seconds: 1), () {
       List<Person> people = [];

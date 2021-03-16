@@ -5,6 +5,7 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:latlong/latlong.dart';
 import 'package:whereabouts_client/components/settings.dart';
+import 'package:whereabouts_client/services/map_functions.dart';
 import 'package:whereabouts_client/services/mock_location.dart';
 
 class MapPage extends StatefulWidget {
@@ -15,22 +16,22 @@ class MapPage extends StatefulWidget {
 class _MapPageState extends State<MapPage> {
   MapController mapController = MapController();
   LatLng currentLocation;
+  LatLng
+      sharedCenter; //Center point of all shared locations and your own position
+  bool sharedCenterEnable = false; //Enables visual sharedCenter on the map
+  double sharedZoom; //Zoom level to use with the "center all" button
   List<Person> people = [];
-  Timer timer;
-  Timer sharedTimer;
+  //ToDo: change timers with background task
+  Timer timer; //Own locations update timer
+  Timer sharedTimer; //Shared locations get timer
 
   @override
   void initState() {
     super.initState();
-    updatePosition();
-    MockLocation.getSharedLocations().then((people) {
-      setState(() {
-        this.people = people;
-      });
-    });
+    updatePosition(move: true);
+    updateShared(move: true);
     timer = Timer.periodic(Duration(seconds: 10), (t) => updatePosition());
-    sharedTimer =
-        Timer.periodic(Duration(seconds: 20), (t) => updateSharedPositions());
+    sharedTimer = Timer.periodic(Duration(seconds: 20), (t) => updateShared());
   }
 
   @override
@@ -40,33 +41,41 @@ class _MapPageState extends State<MapPage> {
     super.dispose();
   }
 
-  void updatePosition() {
+  //Get location, store it, move camera to your position if people are not loaded in
+  void updatePosition({bool move: false}) {
     Geolocator.getCurrentPosition().then((position) {
       setState(() {
         currentLocation = LatLng(position.latitude, position.longitude);
+        if (move && people != null) {
+          mapController.move(currentLocation, 15);
+        }
       });
     });
   }
 
-  void updateSharedPositions() {
+  //Get shared List<Person>, store them, set vars, move to overview of all locations
+  void updateShared({bool move: false}) {
     MockLocation.getSharedLocations().then((people) {
       setState(() {
         this.people = people;
+        sharedCenter = MapFunctions.getSharedCenter(
+            MapFunctions.peopleToLatLngs(people)..add(currentLocation));
+        sharedZoom = MapFunctions.getSharedZoom(
+            MapFunctions.peopleToLatLngs(people)..add(currentLocation));
+        if (move) {
+          mapController.move(sharedCenter, sharedZoom);
+        }
       });
     });
-  }
-
-  LatLng getLatLng() {
-    return LatLng(currentLocation.latitude, currentLocation.longitude);
   }
 
   List<Marker> getMarkers() {
     List<Marker> markers = [];
+
+    //Current position
     if (currentLocation != null) {
       markers.add(
         Marker(
-          width: 40.0,
-          height: 40.0,
           point: currentLocation,
           builder: (ctx) => Container(
             child: Icon(
@@ -78,15 +87,41 @@ class _MapPageState extends State<MapPage> {
       );
     }
 
+    //All shared locations
     for (Person person in people) {
       markers.add(
         Marker(
           point: person.location,
+          height: 85,
+          width: 50,
+          builder: (ctx) => Container(
+            child: Column(
+              children: [
+                Icon(
+                  Icons.person_pin,
+                  color: Colors.green,
+                  size: 50,
+                ),
+                SizedBox(
+                  height: 35,
+                  width: 50,
+                )
+              ],
+            ),
+          ),
+        ),
+      );
+    }
+
+    //Visual sharedCenter on the map
+    if (sharedCenterEnable && sharedCenter != null) {
+      markers.add(
+        Marker(
+          point: sharedCenter,
           builder: (ctx) => Container(
             child: Icon(
-              Icons.person_pin,
+              Icons.radio_button_checked,
               color: Colors.green,
-              size: 50,
             ),
           ),
         ),
@@ -100,6 +135,13 @@ class _MapPageState extends State<MapPage> {
     return Container(
       child: Stack(
         children: [
+          //Background colors to fill up the missing map top and bottom
+          Column(children: [
+            Expanded(child: Container(color: Color(0xffabd3df))),
+            Expanded(child: Container(color: Color(0xfff2efe8))),
+          ]),
+
+          //Map
           FlutterMap(
             mapController: mapController,
             options: MapOptions(
@@ -108,6 +150,7 @@ class _MapPageState extends State<MapPage> {
             ),
             layers: [
               TileLayerOptions(
+                  backgroundColor: Colors.transparent,
                   urlTemplate:
                       "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
                   subdomains: ['a', 'b', 'c']),
@@ -116,6 +159,8 @@ class _MapPageState extends State<MapPage> {
               ),
             ],
           ),
+
+          //UI
           SafeArea(
             child: Padding(
               padding: const EdgeInsets.all(8.0),
@@ -125,10 +170,13 @@ class _MapPageState extends State<MapPage> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
+                    //Top Buttons/ Settings
                     Expanded(
                       flex: 3,
                       child: Settings(),
                     ),
+
+                    //Bottom Buttons
                     Expanded(
                       flex: 1,
                       child: Column(
@@ -137,7 +185,10 @@ class _MapPageState extends State<MapPage> {
                           FloatingActionButton(
                             backgroundColor: Colors.orange,
                             child: Icon(Icons.all_out),
-                            onPressed: () {},
+                            onPressed: () {
+                              mapController.move(sharedCenter, sharedZoom);
+                              mapController.rotate(0);
+                            },
                           ),
                           SizedBox(
                             width: 0,
