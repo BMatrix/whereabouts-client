@@ -9,6 +9,8 @@ class _LatLngMinMax {
 }
 
 class MapFunctions {
+  //ToDo: Use this at some point. I should compensate the fact that on the Mercator map projections land area is way larger near the poles
+  //It's not nessecary at all unless some people are on the North Pole and Antartica at the same time
   double mercatorDeviationCorrection(double lat) {
     return log(tan((pi / 4) + (lat / 2)));
   }
@@ -46,18 +48,14 @@ class MapFunctions {
   static LatLng getSharedCenter(List<LatLng> locations) {
     _LatLngMinMax minMax = _getMinMax(locations);
 
-    return LatLng((minMax.minLat + minMax.maxLat) / 2,
-        (minMax.minLng + minMax.maxLng) / 2);
+    return LatLng((minMax.minLat + minMax.maxLat) / 2, (minMax.minLng + minMax.maxLng) / 2);
   }
 
   //Calculates appropriate zoom level to fit all coordinates on screen at once
   //Zoom level details: https://wiki.openstreetmap.org/wiki/Zoom_levels
   static double getSharedZoom(List<LatLng> locations) {
     _LatLngMinMax minMax = _getMinMax(locations);
-    List<double> sharedCenterBoundingBox = [
-      minMax.maxLat - minMax.minLat,
-      minMax.maxLng - minMax.minLng
-    ];
+    List<double> sharedCenterBoundingBox = [minMax.maxLat - minMax.minLat, minMax.maxLng - minMax.minLng];
 
     //Determines if latitude or longitude should be used to fit on the screen
     //If the bounding box of _LatLngMinMax has an aspect ratio larger then 16/9 use longitude instead of latitude

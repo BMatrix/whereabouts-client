@@ -7,6 +7,7 @@ import 'package:latlong/latlong.dart';
 import 'package:whereabouts_client/components/settings.dart';
 import 'package:whereabouts_client/services/map_functions.dart';
 import 'package:whereabouts_client/services/mock_location.dart';
+import 'package:whereabouts_client/services/preferences.dart';
 
 class MapPage extends StatefulWidget {
   @override
@@ -16,8 +17,7 @@ class MapPage extends StatefulWidget {
 class _MapPageState extends State<MapPage> {
   MapController mapController = MapController();
   LatLng currentLocation;
-  LatLng
-      sharedCenter; //Center point of all shared locations and your own position
+  LatLng sharedCenter; //Center point of all shared locations and your own position
   bool sharedCenterEnable = false; //Enables visual sharedCenter on the map
   double sharedZoom; //Zoom level to use with the "center all" button
   List<Person> people = [];
@@ -30,8 +30,9 @@ class _MapPageState extends State<MapPage> {
     super.initState();
     updatePosition(move: true);
     updateShared(move: true);
-    timer = Timer.periodic(Duration(seconds: 10), (t) => updatePosition());
-    sharedTimer = Timer.periodic(Duration(seconds: 20), (t) => updateShared());
+
+    timer = Timer.periodic(Duration(seconds: Preferences.preferenceValues["updatePositionTime"]), (t) => updatePosition());
+    sharedTimer = Timer.periodic(Duration(seconds: Preferences.preferenceValues["getPositionTime"]), (t) => updateShared());
   }
 
   @override
@@ -58,10 +59,12 @@ class _MapPageState extends State<MapPage> {
     MockLocation.getSharedLocations().then((people) {
       setState(() {
         this.people = people;
-        sharedCenter = MapFunctions.getSharedCenter(
-            MapFunctions.peopleToLatLngs(people)..add(currentLocation));
-        sharedZoom = MapFunctions.getSharedZoom(
-            MapFunctions.peopleToLatLngs(people)..add(currentLocation));
+        List<LatLng> locations = MapFunctions.peopleToLatLngs(people);
+        if (currentLocation != null) {
+          locations.add(currentLocation);
+        }
+        sharedCenter = MapFunctions.getSharedCenter(locations);
+        sharedZoom = MapFunctions.getSharedZoom(locations);
         if (move) {
           mapController.move(sharedCenter, sharedZoom);
         }
@@ -151,8 +154,7 @@ class _MapPageState extends State<MapPage> {
             layers: [
               TileLayerOptions(
                   backgroundColor: Colors.transparent,
-                  urlTemplate:
-                      "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+                  urlTemplate: "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
                   subdomains: ['a', 'b', 'c']),
               MarkerLayerOptions(
                 markers: getMarkers(),

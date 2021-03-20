@@ -26,8 +26,7 @@ class MockLocation {
       for (int i = 0; i < 2; i++) {
         Person person = Person(
           mocknames[i],
-          LatLng((random.nextDouble() * 115) - 35,
-              (random.nextDouble() * 360) - 180),
+          LatLng((random.nextDouble() * 115) - 35, (random.nextDouble() * 360) - 180),
           DateTime.now(),
         );
         people.add(person);

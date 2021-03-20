@@ -1,8 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:whereabouts_client/screens/map_page.dart';
+import 'package:whereabouts_client/services/preferences.dart';
 
 void main() {
-  runApp(MyApp());
+  //Lock screen orientation to portraitUp
+  //I can't be bothered to fix the ui to also work decently in landscape
+  WidgetsFlutterBinding.ensureInitialized();
+  SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]).then((value) {
+    //Load in Preferences before launching the app itself
+    Preferences.initialise().then((value) {
+      runApp(MyApp());
+    });
+  });
 }
 
 class MyApp extends StatelessWidget {
