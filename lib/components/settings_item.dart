@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
 
 class SettingsItem extends StatefulWidget {
-  const SettingsItem({
-    Key key,
+  SettingsItem({
     @required this.settingTitle,
     @required this.modifyableWidget,
-  }) : super(key: key);
+  });
 
   final String settingTitle; //Title of the setting
   final Widget modifyableWidget; //The Widget the user will interact with

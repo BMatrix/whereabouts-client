@@ -2,8 +2,10 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
+import 'package:flutter_map_marker_popup/flutter_map_marker_popup.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:latlong/latlong.dart';
+import 'package:whereabouts_client/components/marker_popup.dart';
 import 'package:whereabouts_client/components/settings.dart';
 import 'package:whereabouts_client/services/map_functions.dart';
 import 'package:whereabouts_client/services/mock_location.dart';
@@ -16,6 +18,7 @@ class MapPage extends StatefulWidget {
 
 class _MapPageState extends State<MapPage> {
   MapController mapController = MapController();
+  final PopupController _popupLayerController = PopupController();
   LatLng currentLocation;
   LatLng sharedCenter; //Center point of all shared locations and your own position
   bool sharedCenterEnable = false; //Enables visual sharedCenter on the map
@@ -79,11 +82,14 @@ class _MapPageState extends State<MapPage> {
     if (currentLocation != null) {
       markers.add(
         Marker(
+          width: 24,
+          height: 24,
           point: currentLocation,
           builder: (ctx) => Container(
             child: Icon(
               Icons.radio_button_checked,
               color: Colors.blue,
+              size: 24,
             ),
           ),
         ),
@@ -94,22 +100,15 @@ class _MapPageState extends State<MapPage> {
     for (Person person in people) {
       markers.add(
         Marker(
-          point: person.location,
-          height: 85,
           width: 50,
-          builder: (ctx) => Container(
-            child: Column(
-              children: [
-                Icon(
-                  Icons.person_pin,
-                  color: Colors.green,
-                  size: 50,
-                ),
-                SizedBox(
-                  height: 35,
-                  width: 50,
-                )
-              ],
+          height: 50,
+          point: person.location,
+          anchorPos: AnchorPos.exactly(Anchor(25, 5)), //25: centers horizontally, 5 makes icon point to exact location
+          builder: (_) => Container(
+            child: Icon(
+              Icons.person_pin,
+              color: Colors.green,
+              size: 50,
             ),
           ),
         ),
@@ -150,14 +149,29 @@ class _MapPageState extends State<MapPage> {
             options: MapOptions(
               center: LatLng(0, 0),
               zoom: 2.0,
+              minZoom: 0, //Map dissapears if zoomed out too far
+              maxZoom: 18, //Map dissapears if zoomed in too far
+              interactiveFlags: InteractiveFlag.all & ~InteractiveFlag.rotate, //Disable map rotation
+              plugins: [PopupMarkerPlugin()],
+              onTap: (_) => _popupLayerController.hidePopup(),
             ),
             layers: [
               TileLayerOptions(
                   backgroundColor: Colors.transparent,
                   urlTemplate: "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
                   subdomains: ['a', 'b', 'c']),
-              MarkerLayerOptions(
+              PopupMarkerLayerOptions(
                 markers: getMarkers(),
+                popupSnap: PopupSnap.markerTop,
+                popupController: _popupLayerController,
+                popupBuilder: (BuildContext context, Marker marker) {
+                  for (Person person in people) {
+                    if (person.location == marker.point) {
+                      return MarkerPopup(person);
+                    }
+                  }
+                  return Container();
+                },
               ),
             ],
           ),
@@ -166,21 +180,12 @@ class _MapPageState extends State<MapPage> {
           SafeArea(
             child: Padding(
               padding: const EdgeInsets.all(8.0),
-              child: Align(
-                alignment: Alignment.centerRight,
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    //Top Buttons/ Settings
-                    Expanded(
-                      flex: 3,
-                      child: Settings(),
-                    ),
-
-                    //Bottom Buttons
-                    Expanded(
-                      flex: 1,
+              child: Stack(
+                children: [
+                  //Bottom Buttons
+                  Align(
+                    alignment: Alignment.bottomRight,
+                    child: IntrinsicHeight(
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.end,
                         children: [
@@ -207,8 +212,14 @@ class _MapPageState extends State<MapPage> {
                         ],
                       ),
                     ),
-                  ],
-                ),
+                  ),
+
+                  //Top Buttons/ Settings
+                  Align(
+                    alignment: Alignment.topRight,
+                    child: Settings(),
+                  ),
+                ],
               ),
             ),
           ),

@@ -15,7 +15,7 @@ class Person {
 }
 
 Random random = Random();
-List<String> mocknames = ["A", "B", "C", "D", "E"];
+List<String> mocknames = ["Aaaaa", "Bbbbb", "Ccccc", "Ddddd", "Eeeee"];
 
 class MockLocation {
   //Simulates requesting locations from the server

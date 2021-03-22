@@ -120,128 +120,122 @@ class _SettingsState extends State<Settings> {
               ),
               child: ClipRRect(
                 borderRadius: BorderRadius.circular((floatingActionButtonSize / 2) - settingsBorderWidth),
-                child: Material(
-                  color: Colors.transparent,
-                  child:
+                child: ListView(
+                  children: [
+                    //All of these SizedBoxes could probably be replaced by using a ListView.seperated but I couldn't be bothered
+                    SizedBox(
+                      height: 10,
+                    ),
 
-                      //Settings List
-                      ListView(
-                    children: [
-                      //All of these SizedBoxes could probably be replaced by using a ListView.seperated but I couldn't be bothered
-                      SizedBox(
-                        height: 10,
-                      ),
-
-                      //Title
-                      Padding(
-                        padding: const EdgeInsets.fromLTRB(0, 2, 0, 10),
-                        child: Text(
-                          "Settings",
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            fontSize: 25,
-                          ),
+                    //Title
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(0, 2, 0, 10),
+                      child: Text(
+                        "Settings",
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontSize: 25,
                         ),
                       ),
+                    ),
 
-                      SizedBox(
-                        height: 10,
-                      ),
+                    SizedBox(
+                      height: 10,
+                    ),
 
-                      SettingsItem(
-                        settingTitle: "Update your position every: ",
-                        modifyableWidget: DropdownButton(
-                          value: Preferences.preferenceValues["updatePositionTime"],
-                          items: secondOptions.map<DropdownMenuItem<int>>((int value) {
-                            return DropdownMenuItem<int>(
-                              value: value,
-                              child: Text(getTimeString(value)),
-                            );
-                          }).toList(),
-                          onChanged: (value) {
-                            setState(() {
-                              Preferences.preferenceValues["updatePositionTime"] = value;
-                            });
-                            Preferences.setPreferences();
-                          },
-                        ),
+                    SettingsItem(
+                      settingTitle: "Update your position every: ",
+                      modifyableWidget: DropdownButton(
+                        value: Preferences.preferenceValues["updatePositionTime"],
+                        items: secondOptions.map<DropdownMenuItem<int>>((int value) {
+                          return DropdownMenuItem<int>(
+                            value: value,
+                            child: Text(getTimeString(value)),
+                          );
+                        }).toList(),
+                        onChanged: (value) {
+                          setState(() {
+                            Preferences.preferenceValues["updatePositionTime"] = value;
+                          });
+                          Preferences.setPreferences();
+                        },
                       ),
+                    ),
 
-                      SizedBox(
-                        height: 10,
-                      ),
+                    SizedBox(
+                      height: 10,
+                    ),
 
-                      SettingsItem(
-                        settingTitle: "Request friend positions every: ",
-                        modifyableWidget: DropdownButton(
-                          value: Preferences.preferenceValues["getPositionTime"],
-                          items: secondOptions.map<DropdownMenuItem<int>>((int value) {
-                            return DropdownMenuItem<int>(
-                              value: value,
-                              child: Text(getTimeString(value)),
-                            );
-                          }).toList(),
-                          onChanged: (value) {
-                            setState(() {
-                              Preferences.preferenceValues["getPositionTime"] = value;
-                            });
-                            Preferences.setPreferences();
-                          },
-                        ),
+                    SettingsItem(
+                      settingTitle: "Request friend positions every: ",
+                      modifyableWidget: DropdownButton(
+                        value: Preferences.preferenceValues["getPositionTime"],
+                        items: secondOptions.map<DropdownMenuItem<int>>((int value) {
+                          return DropdownMenuItem<int>(
+                            value: value,
+                            child: Text(getTimeString(value)),
+                          );
+                        }).toList(),
+                        onChanged: (value) {
+                          setState(() {
+                            Preferences.preferenceValues["getPositionTime"] = value;
+                          });
+                          Preferences.setPreferences();
+                        },
                       ),
+                    ),
 
-                      SizedBox(
-                        height: 10,
-                      ),
+                    SizedBox(
+                      height: 10,
+                    ),
 
-                      SettingsItem(
-                        settingTitle: "Server IP: ",
-                        modifyableWidget: TextField(
-                          controller: serverIPTextFieldController,
-                          onChanged: (value) {
-                            Preferences.preferenceValues["serverIp"] = value;
-                            Preferences.setPreferences();
-                          },
-                        ),
+                    SettingsItem(
+                      settingTitle: "Server IP: ",
+                      modifyableWidget: TextField(
+                        controller: serverIPTextFieldController,
+                        onChanged: (value) {
+                          Preferences.preferenceValues["serverIp"] = value;
+                          Preferences.setPreferences();
+                        },
                       ),
+                    ),
 
-                      SizedBox(
-                        height: 10,
-                      ),
+                    SizedBox(
+                      height: 10,
+                    ),
 
-                      SettingsItem(
-                        settingTitle: "Server Port: ",
-                        modifyableWidget: TextField(
-                          controller: serverPortTextFieldController,
-                          onChanged: (value) {
-                            Preferences.preferenceValues["serverPort"] = int.parse(value);
-                            Preferences.setPreferences();
-                          },
-                        ),
+                    SettingsItem(
+                      settingTitle: "Server Port: ",
+                      modifyableWidget: TextField(
+                        controller: serverPortTextFieldController,
+                        onChanged: (value) {
+                          Preferences.preferenceValues["serverPort"] = int.parse(value);
+                          Preferences.setPreferences();
+                        },
                       ),
+                    ),
 
-                      SizedBox(
-                        height: 10,
-                      ),
+                    SizedBox(
+                      height: 10,
+                    ),
 
-                      SettingsItem(
-                        settingTitle: "Reset settings to default values",
-                        modifyableWidget: ElevatedButton(
-                          child: Text("Reset"),
-                          onPressed: () {
-                            setState(() {
-                              Preferences.resetPreferences();
-                              setTextFields();
-                            });
-                          },
-                        ),
+                    SettingsItem(
+                      settingTitle: "Reset settings to default values",
+                      modifyableWidget: ElevatedButton(
+                        child: Text("Reset"),
+                        onPressed: () {
+                          setState(() {
+                            Preferences.resetPreferences();
+                            setTextFields();
+                          });
+                        },
                       ),
+                    ),
 
-                      SizedBox(
-                        height: 10,
-                      ),
-                    ],
-                  ),
+                    SizedBox(
+                      height: 10,
+                    ),
+                  ],
                 ),
               ),
             );

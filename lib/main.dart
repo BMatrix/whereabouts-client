@@ -24,7 +24,10 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: MapPage(),
+      home: Material(
+        //This Material widget only exists make the rest of the Material widgets stop complaning
+        child: MapPage(),
+      ),
     );
   }
 }
