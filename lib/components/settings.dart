@@ -4,23 +4,43 @@ import 'package:flutter/material.dart';
 import 'package:whereabouts_client/components/settings_item.dart';
 import 'package:whereabouts_client/services/preferences.dart';
 
-enum SettingsAnimationState {
-  open,
-  mid,
-  closed,
+class SettingsPanelController {
+  _SettingsPanelState state;
+
+  _setSettingsState(_SettingsPanelState state) {
+    this.state = state;
+  }
+
+  getPanelState() {
+    return state.animationState;
+  }
+
+  openCloseSettingsPanel(SettingsPanelOperation operation) {
+    state.openCloseSettings(operation);
+  }
 }
 
-class Settings extends StatefulWidget {
-  const Settings({
-    Key key,
-  }) : super(key: key);
+enum SettingsPanelOperation {
+  open,
+  _mid,
+  close,
+}
+
+class SettingsPanel extends StatefulWidget {
+  SettingsPanel({this.controller});
+  final SettingsPanelController controller;
+
+  final _SettingsPanelState _settingsState = _SettingsPanelState();
 
   @override
-  _SettingsState createState() => _SettingsState();
+  _SettingsPanelState createState() {
+    controller._setSettingsState(_settingsState);
+    return _settingsState;
+  }
 }
 
-class _SettingsState extends State<Settings> {
-  SettingsAnimationState animationState = SettingsAnimationState.closed; //State of the settings panel
+class _SettingsPanelState extends State<SettingsPanel> {
+  SettingsPanelOperation animationState = SettingsPanelOperation.close; //State of the settings panel
   Duration animationSpeed = Duration(); //Time it takes for the settings panel to do an animation
   TextEditingController serverIPTextFieldController = TextEditingController(); //Controlls the text field n stuff
   TextEditingController serverPortTextFieldController = TextEditingController(); //Controlls the text field n stuff
@@ -53,9 +73,9 @@ class _SettingsState extends State<Settings> {
 
   //Takes the current animationState and returns the desired settings panel size
   double getSettingsSize(String direction, double max) {
-    if (animationState == SettingsAnimationState.closed) {
+    if (animationState == SettingsPanelOperation.close) {
       return 56.2;
-    } else if (animationState == SettingsAnimationState.mid) {
+    } else if (animationState == SettingsPanelOperation._mid) {
       if (direction == "width") {
         return max;
       } else {
@@ -68,31 +88,33 @@ class _SettingsState extends State<Settings> {
   }
 
   //Opens/ closes the settings panel with some delay for the animations to play
-  void openCloseSettings() {
-    if (animationState == SettingsAnimationState.closed) {
-      setState(() {
-        animationSpeed = Duration(milliseconds: 300);
-        animationState = SettingsAnimationState.mid;
-      });
-      Timer(Duration(milliseconds: 300), () {
-        setState(() {
-          animationSpeed = Duration(milliseconds: 200);
-          animationState = SettingsAnimationState.open;
-        });
-      });
-    }
-
-    if (animationState == SettingsAnimationState.open) {
-      setState(() {
-        animationSpeed = Duration(milliseconds: 200);
-        animationState = SettingsAnimationState.mid;
-      });
-      Timer(Duration(milliseconds: 200), () {
+  void openCloseSettings(SettingsPanelOperation operation) {
+    if (operation != animationState) {
+      if (operation == SettingsPanelOperation.open) {
         setState(() {
           animationSpeed = Duration(milliseconds: 300);
-          animationState = SettingsAnimationState.closed;
+          animationState = SettingsPanelOperation._mid;
         });
-      });
+        Timer(Duration(milliseconds: 300), () {
+          setState(() {
+            animationSpeed = Duration(milliseconds: 200);
+            animationState = SettingsPanelOperation.open;
+          });
+        });
+      }
+
+      if (operation == SettingsPanelOperation.close) {
+        setState(() {
+          animationSpeed = Duration(milliseconds: 200);
+          animationState = SettingsPanelOperation._mid;
+        });
+        Timer(Duration(milliseconds: 200), () {
+          setState(() {
+            animationSpeed = Duration(milliseconds: 300);
+            animationState = SettingsPanelOperation.close;
+          });
+        });
+      }
     }
   }
 
@@ -245,7 +267,11 @@ class _SettingsState extends State<Settings> {
           backgroundColor: Colors.grey,
           child: Icon(Icons.settings),
           onPressed: () {
-            openCloseSettings();
+            if (animationState == SettingsPanelOperation.open) {
+              openCloseSettings(SettingsPanelOperation.close);
+            } else if (animationState == SettingsPanelOperation.close) {
+              openCloseSettings(SettingsPanelOperation.open);
+            }
           },
         ),
       ],
