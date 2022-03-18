@@ -1,7 +1,7 @@
 import 'dart:math';
 
 import 'package:latlong/latlong.dart';
-import 'package:whereabouts_client/services/mock_location.dart';
+import 'package:whereabouts_client/models/people.dart';
 
 //Used to prevent List<double> minMax = [-90,90,-180,180] which provides no decent context in how it is used
 class _LatLngMinMax {

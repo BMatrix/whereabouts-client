@@ -9,6 +9,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:latlong/latlong.dart';
 import 'package:whereabouts_client/components/marker_popup.dart';
 import 'package:whereabouts_client/components/settings.dart';
+import 'package:whereabouts_client/models/people.dart';
 import 'package:whereabouts_client/services/map_functions.dart';
 import 'package:whereabouts_client/services/mock_location.dart';
 import 'package:whereabouts_client/services/preferences.dart';

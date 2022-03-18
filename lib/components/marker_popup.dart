@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:whereabouts_client/services/mock_location.dart';
+import 'package:whereabouts_client/models/people.dart';
 
 class MarkerPopup extends StatefulWidget {
   MarkerPopup(this.person);

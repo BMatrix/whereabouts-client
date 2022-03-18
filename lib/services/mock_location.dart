@@ -1,18 +1,7 @@
 import 'dart:math';
 
 import 'package:latlong/latlong.dart';
-
-class Person {
-  Person(String name, LatLng location, DateTime time) {
-    this.name = name;
-    this.location = location;
-    this.time = time;
-  }
-
-  String name;
-  LatLng location;
-  DateTime time;
-}
+import 'package:whereabouts_client/models/people.dart';
 
 Random random = Random();
 List<String> mocknames = ["Aaaaa", "Bbbbb", "Ccccc", "Ddddd", "Eeeee"];
@@ -24,10 +13,11 @@ class MockLocation {
     return Future.delayed(Duration(seconds: 1), () {
       List<Person> people = [];
       for (int i = 0; i < 2; i++) {
-        Person person = Person(
-          mocknames[i],
-          LatLng((random.nextDouble() * 115) - 35, (random.nextDouble() * 360) - 180),
-          DateTime.now(),
+        Person person = new Person(
+          id: Random.secure().nextInt(99999).toString(),
+          name: mocknames[i],
+          location: LatLng((random.nextDouble() * 115) - 35, (random.nextDouble() * 360) - 180),
+          time: DateTime.now()
         );
         people.add(person);
       }
