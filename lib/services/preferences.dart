@@ -10,7 +10,7 @@ class Preferences {
     "updatePositionTime": 60,
     "getPositionTime": 60,
     "serverIp": "",
-    "serverPort": 80,
+    "serverPort": 34464,
   };
 
   //The current preferences

@@ -10,6 +10,7 @@ import 'package:latlong/latlong.dart';
 import 'package:whereabouts_client/components/marker_popup.dart';
 import 'package:whereabouts_client/components/settings.dart';
 import 'package:whereabouts_client/models/people.dart';
+import 'package:whereabouts_client/services/location.dart';
 import 'package:whereabouts_client/services/map_functions.dart';
 import 'package:whereabouts_client/services/mock_location.dart';
 import 'package:whereabouts_client/services/preferences.dart';
@@ -64,7 +65,7 @@ class _MapPageState extends State<MapPage> {
 
   void updateShared({bool move: false}) {
     //Get shared List<Person>
-    MockLocation.getSharedLocations().then((people) {
+    Location.getSharedLocations().then((people) {
       setState(() {
         this.people = people;
 
