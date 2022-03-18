@@ -56,6 +56,7 @@ class _MapPageState extends State<MapPage> {
     Geolocator.getCurrentPosition().then((position) {
       setState(() {
         currentLocation = LatLng(position.latitude, position.longitude);
+        Location.updatePosition(currentLocation);
         if (move && people != null) {
           mapController.move(currentLocation, 15);
         }

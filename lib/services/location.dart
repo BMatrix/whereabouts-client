@@ -2,8 +2,10 @@ import 'dart:io';
 import 'dart:convert';
 import 'dart:async';
 
+import 'package:latlong/latlong.dart';
 import 'package:whereabouts_client/models/people.dart';
 import 'package:whereabouts_client/models/request.dart';
+import 'package:whereabouts_client/models/update.dart';
 import 'package:whereabouts_client/services/preferences.dart';
 
 class Location {
@@ -39,7 +41,13 @@ class Location {
     return response.people;
   }
 
-  static updatePosition() async {
+  static updatePosition(LatLng location) async {
+    Socket socket = await Socket.connect(Preferences.preferenceValues["serverIp"], Preferences.preferenceValues["serverPort"]);
+
+    String update = updateToJson(new Update(id: "id goes here", lat: location.latitude, lon: location.longitude, time: DateTime.now()));
     
+    socket.add(utf8.encode(update));
+
+    socket.close();
   }
 }
